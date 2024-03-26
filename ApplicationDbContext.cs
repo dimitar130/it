@@ -1,44 +1,39 @@
-﻿using Lab1.EShop.Web.Models.DomainModels;
-using Lab1.EShop.Web.Models.Identity;
+﻿using LabB.Web.Models.Domain;
+using LabB.Web.Models.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Lab1.EShop.Web.Data
+namespace LabB.Web.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<User>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
-
-        public DbSet<Concert> Concerts { get; set; }
-        public DbSet<ConcertTicket> ConcertsTickets { get; set; }
-
+        public virtual DbSet<TheatreShow> TheatreShows { get; set; }
+        public virtual DbSet<Ticket> Tickets { get; set; }
+        public virtual DbSet<ApplicationUser> Users { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Concert>()
+            builder.Entity<TheatreShow>()
                 .Property(z => z.Id)
                 .ValueGeneratedOnAdd();
 
-            builder.Entity<ConcertTicket>()
+            builder.Entity<Ticket>()
                 .Property(z => z.Id)
                 .ValueGeneratedOnAdd();
-          
+            builder.Entity<Ticket>()
+                .HasOne(t => t.theatreShow)
+                .WithMany(c => c.Tickets)
+                .HasForeignKey(t => t.theatreShowId);
+            builder.Entity<Ticket>()
+               .HasOne(t => t.applicationUser)
+               .WithMany(c => c.Tickets)
+               .HasForeignKey(t => t.applicationUserId);
 
-            builder.Entity<ConcertTicket>()
-                .HasOne(z => z.Concert)
-                .WithMany(z => z.ConcertTickets)
-                .HasForeignKey(z => z.ConcertId);
-
-            builder.Entity<ConcertTicket>()
-                .HasOne(z => z.Owner)
-                .WithMany(z => z.ConcertTickets)
-                .HasForeignKey(z => z.OwnerId);
-
-            
 
         }
     }
